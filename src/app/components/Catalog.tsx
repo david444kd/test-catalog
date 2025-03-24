@@ -66,7 +66,7 @@ const Catalog = () => {
         setProducts(data);
 
         const uniqueCategories = data.reduce(
-          (acc: Category[], product: any) => {
+          (acc: Category[], product: Product) => {
             if (!acc.some((c) => c.id === product.category.id)) {
               acc.push(product.category);
             }

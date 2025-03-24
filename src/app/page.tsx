@@ -1,5 +1,5 @@
 "use client";
-import { useSetAtom, useAtomValue, useAtom } from "jotai";
+import { useAtomValue, useAtom } from "jotai";
 import { sortByAtom, categoryFilterAtom, categoriesAtom } from "../lib/atoms";
 import { cartAtom } from "../lib/atoms";
 import {
@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import Catalog from "./components/Catalog";
 import Link from "next/link";
 
