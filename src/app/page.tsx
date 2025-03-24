@@ -1,103 +1,220 @@
+"use client";
+import { useSetAtom, useAtomValue, useAtom } from "jotai";
+import { sortByAtom, categoryFilterAtom, categoriesAtom } from "../lib/atoms";
+import { cartAtom } from "../lib/atoms";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Catalog from "./components/Catalog";
+import Link from "next/link";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [sortBy, setSortBy] = useAtom(sortByAtom);
+  const [category, setCategoryFilter] = useAtom(categoryFilterAtom);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const categories = useAtomValue(categoriesAtom);
+  const cart = useAtomValue(cartAtom);
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="z-50 fixed bg-white w-full h-[80px] flex items-center p-5 md:p-10 border-b-2 border-black justify-between">
+        <h1 className="text-[20px] md:text-[32px] font-bold">Каталог</h1>
+
+        <div className="flex gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="md:flex hidden">
+              <Button variant="outline">
+                {sortBy === "price_asc"
+                  ? "По возрастанию цены"
+                  : sortBy === "price_desc"
+                  ? "По убыванию цены"
+                  : sortBy === "date_new"
+                  ? "Новые сначала"
+                  : sortBy === "date_old"
+                  ? "Старые сначала"
+                  : "Сортировать по"}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setSortBy("price_asc")}>
+                По возрастанию цены
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("price_desc")}>
+                По убыванию цены
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("date_new")}>
+                Новые сначала
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("date_old")}>
+                Старые сначала
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy(null)}>
+                Сбросить сортировку
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="md:flex hidden">
+              <Button variant="outline">
+                {category?.name || "Все категории"}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setCategoryFilter(null)}>
+                Все категории
+              </DropdownMenuItem>
+              {categories.map((category) => (
+                <DropdownMenuItem
+                  key={category.id}
+                  onClick={() => setCategoryFilter(category)}
+                >
+                  {category.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Sheet>
+            <SheetTrigger asChild className="md:hidden flex">
+              <Button variant={"outline"}>Фильтры</Button>
+            </SheetTrigger>
+            <SheetContent className="p-5">
+              <SheetHeader>
+                <SheetTitle>Фильтры</SheetTitle>
+                <SheetDescription></SheetDescription>
+              </SheetHeader>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    {sortBy === "price_asc"
+                      ? "По возрастанию цены"
+                      : sortBy === "price_desc"
+                      ? "По убыванию цены"
+                      : sortBy === "date_new"
+                      ? "Новые сначала"
+                      : sortBy === "date_old"
+                      ? "Старые сначала"
+                      : "Сортировать по"}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 ml-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => setSortBy("price_asc")}>
+                    По возрастанию цены
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy("price_desc")}>
+                    По убыванию цены
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy("date_new")}>
+                    Новые сначала
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy("date_old")}>
+                    Старые сначала
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy(null)}>
+                    Сбросить сортировку
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    {category?.name || "Все категории"}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 ml-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => setCategoryFilter(null)}>
+                    Все категории
+                  </DropdownMenuItem>
+                  {categories.map((category) => (
+                    <DropdownMenuItem
+                      key={category.id}
+                      onClick={() => setCategoryFilter(category)}
+                    >
+                      {category.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SheetContent>
+          </Sheet>
+          <Link href="/cart" className="relative">
+            <Button variant="outline" className="bg-blue-400">
+              Корзина
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+      <div className="h-[80px]"></div>
+      <Catalog />
     </div>
   );
 }
